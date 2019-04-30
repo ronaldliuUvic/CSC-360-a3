@@ -2,9 +2,7 @@
 Student name: Ronald Liu Ho Wah
 Student id: V00838627
 
-@REMARKS: THIS IS THE LONGEST CODING I WROTE EVER IN MY ENTIRE LIFE LOL
-		  I CAN'T BELIEVE I WROTE UP TO 2 THOUSANDS LINES. THIS IS INSANEEEEEEE
-
+implementing a log file system
 		  
 simple structure of LLFS:	Block 1	Superblock
 							Block 2-8 free block vectors
