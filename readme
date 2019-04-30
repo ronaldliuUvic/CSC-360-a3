@@ -1,0 +1,188 @@
+
+Student name: Ronald Liu Ho Wah
+Student id: V00838627
+
+@REMARKS: THIS IS THE LONGEST CODING I WROTE EVER IN MY ENTIRE LIFE LOL
+		  I CAN'T BELIEVE I WROTE UP TO 2 THOUSANDS LINES. THIS IS INSANEEEEEEE
+
+		  
+simple structure of LLFS:	Block 1	Superblock
+							Block 2-8 free block vectors
+							Block 9-24 inode mapping
+							
+structure of superblock: 	magic_number(4bytes)
+							NUM_BLOCKS(4bytes)
+							NUM_INODE(4bytes) 
+							root_inode_index(4bytes) 
+							robust data(62bytes)
+							
+structure of inode, directory: following the assignment suggestions
+
+
+compile files:  $ chmod +x shell.sh
+				$ ./shell.sh
+		  
+		  
+Here are all the test cases cases I wrote:
+
+test02.c 
+  1. initLLFS( disk )
+  
+		#this function is to initialize the file system setting up the superblock, free block vector, inode mapping and root dirctory
+  
+test01.c
+  1. "Mkdir /home"
+  
+		#create sub_directory in root
+		#output: "$$$$$$$$$$$$$$ we added a sub directory: home" 
+				showing that create directory successfully
+
+  2. "Mkdir /home/hello"
+  
+		#similar output as test case 1
+
+  3. "Mkdir /home/hello/hello2"
+  
+		#similar output as test case 1
+
+  4. "Writefile /home/hello/hello2/file1" and the content is "hello world I'm Ronald"
+		
+		#should make a new file and creating inode and datablock with content filled-in
+
+  5. "Open /home/hello/hello2/file1"
+  
+		#try to display the result of the previous test case. 
+		#output: "        content of the file:
+				  hello world I'm Ronald				"
+  
+  6. "Mkdir /home/hello_2nd"
+  
+		#similar output as test case 1
+
+  7. "Writefile /home/hello/hello2/testing2" and the content is "hello world hello world"
+  
+		#similar output as test case 4
+
+  8. "Writefile /home/hello_2nd/testing" and the content is 512*a + 512*b + 2*c
+		( for testing the use of file larger than 1 block ) 
+		
+		#similar output as test case 4, but the difference is the file content is larger than 1 blcok size
+
+  9. "Open /home/hello_2nd/testing"
+  
+		#display the result of the previous test case. 	( file content of 1026 characters )
+		#output: a bunch of aaaaa...bbbbbb....cc 		( I added 2 c's in order to check the end of strings is printed correctly ) 
+  
+  10. "Rmfile /home/hello_2nd/testing"
+  
+		#deleting file
+		#output: " $$$$$$$$$$$$$$ we deleted a file, file name: testing"
+  
+  11. "list /home/hello_2nd"
+  
+		#listing out all the file or sub-directory in this "hello_2nd" directory
+		#similar as linux "ls"
+		#output: empty ( since we deleted the only file in this directory in previous test case )
+  
+  12. "Rmdir /home/hello_2nd";
+  
+		#delete dirtory
+		#output: " $$$$$$$$$$$$$$ we deleted a directory, directory name: hello_2nd"
+  
+  13. "list /home/hello_2nd"
+  
+		#listing out all the file or sub-directory
+		#same as test case 11
+		#output: "no such directory in this datablock: 'hello_2nd'"
+				( since we deleted the whole directory in previous test case )
+  
+  
+  14. "list /home"
+
+		#output: "    here is all the file in home directory:
+
+					  #### file name 0 : hello
+
+					 $$$$$$$$$$$$$$ we listed all the file in home directory	"
+		#test: there is only one sub-directory left in "home" directory ("hello_2nd" should not exist)
+  
+  15. "Writefile /testing3" and content is "hello world hello world"
+  
+		#create file in root directory
+		#similar output as previous 'Writefile' test cases
+  
+  16. "list /" (=root)
+  
+		#list out all file or sub-dir at root
+		#output: "     here is all the file in list  directory:
+		
+					   #### file name 0 : home
+					   #### file name 1 : testing3
+
+					 $$$$$$$$$$$$$$ we listed all the file in list  directory "
+
+  17. "Writefile /home/hello/hello2/testing4" and the content is Empty
+		
+		#create an empty content file
+
+  18. "list /home/hello/hello2";
+  
+		#output: "    here is all the file in hello2 directory:
+
+					  #### file name 0 : file1
+					  #### file name 1 : testing2
+					  #### file name 2 : testing4
+
+					$$$$$$$$$$$$$$ we listed all the file in hello2 directory "
+
+  19. "Open /home/hello/hello2/testing4"
+  
+		#Opening an empty content file
+		#output: "  content of the file:   (empty)   
+													"
+  
+  20. "Writefile /home/hello/hello2/test11" and the content is 9141 characters ( aa...bb...u )
+		( for testing the use of indirect block )
+		
+		#create a file with content up to 9141 bytes ( need more than 10 blocks )
+		#for testing indirect block
+
+  21. "Open /home/hello/hello2/test11"
+  
+		#printing the file with the use of indirect block
+		#output: "aaaaaaa.....bbbbbb.....u"
+				( the first 10 blocks are all a's, 
+				  the rest blocks are all b's except the last character is 'u' )
+				 I used 'u' as an indicator of printing the proper string.
+
+
+  
+Robust: backup metadata (inode - size+flag), and save the last command compiled as record in the superblock, 
+	
+		then everytime when we open vdisk (simulating the situation of program crashed and restart), 
+		
+		we will first check the history record of last compile command, then it will tell the user if last compile 
+		
+		success or fail. If fail, it will pop up *something is lost after the last compile*.
+		
+		If last compile command = Writefile/Mkdir/delete_dir/delete_file, we will check vdisk's 
+		
+		content with the use of inode metadata's file_size value. 
+
+		Secondly, with respect to the goal of this assignment, we able to set up a timer in thread to process and update of information into vdisk.
+  
+		Lastly, balancing the cost of updating disk, there are some function I implemented to make it robust:
+		
+		1.) backup metadata - compare to previous history to find out if any data lost.
+								e.g. function: robust_check(), comparing_last_compile(), etc
+								
+								output: ****vdisk is up to date, previous compile successfully****
+								
+		2.) avoid the use of local/global variables - most of the data are extract from disk, and update the disk immediately if data is modified.
+								e.g. function: update_superblock(), read_superblock(), get_root_inode_index()
+  
+
+useful source: 
+https://linuxconfig.org/bash-scripting-tutorial-for-beginners
+https://www.tutorialspoint.com/c_standard_library/c_function_fopen.htm
+stack over flow
